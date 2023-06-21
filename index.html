@@ -1,0 +1,207 @@
+<html lang="en">
+<head>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.1/css/bootstrap.min.css" integrity="sha512-Ez0cGzNzHR1tYAv56860NLspgUGuQw16GiOOp/I2LuTmpSK9xDXlgJz3XN4cnpXWDmkNBKXR/VDMTCnAaEooxA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="static/aloe_widget.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            overflow-y: auto;
+            overflow-x: hidden;
+       }
+    </style>
+    
+
+</head>
+<body>
+    <div class="row">
+        <div class="col-6">
+            <div class="card card-bordered" >
+                <div class="card-header">
+                    <h4 class="card-title"><strong>Aloe Chat</strong></h4>
+                </div>
+        
+                <div class="ps-container ps-theme-default ps-active-y" id="chat-content" style="overflow-y: scroll !important; height: 850px !important;">
+                    
+                    <div class="media media-chat">
+                        <i class="bi bi-person"></i>
+                        <div class="media-body">
+                            <p>test</p>
+                        </div>
+                    </div>
+        
+                <div class="ps-scrollbar-x-rail" style="left: 0px; bottom: 0px;"><div class="ps-scrollbar-x" tabindex="0" style="left: 0px; width: 0px;"></div></div><div class="ps-scrollbar-y-rail" style="top: 0px; height: 0px; right: 2px;"><div class="ps-scrollbar-y" tabindex="0" style="top: 0px; height: 2px;"></div></div></div>
+        
+                <div class="publisher bt-1 border-light">
+                    <i class="bi bi-person"></i>
+                    <input class="publisher-input" type="text" placeholder="Ask me anything..." onkeydown="userMessageSubmit(this)">
+                    <span class="publisher-btn file-group">
+                    </span>
+                    <a class="publisher-btn text-info" onClick="userMessageSubmit(this)" href="#" data-abc="true"><i class="bi bi-send"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="d-flex justify-content-center">
+                <iframe class="d-none" width="640" height="360" src="{{url}}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+
+        var button;
+        var chat_window;
+
+        var chatIsOpen = false
+        var chatBubblesPresent = false
+
+        var lastChatter = "aloe"
+        var conversation = []
+
+
+        Element.prototype.remove = function() {
+            this.parentElement.removeChild(this);
+        }
+        NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
+            for(var i = this.length - 1; i >= 0; i--) {
+                if(this[i] && this[i].parentElement) {
+                    this[i].parentElement.removeChild(this[i]);
+                }
+            }
+        }
+
+        function make_engine_request(text){
+            add_chat_bubbles()
+            const requestOptions = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat: text, conversation:conversation })
+            };
+            fetch('http://127.0.0.1:5000/get_engine_pointed', requestOptions)
+                .then(response => response.json())
+                .then((data) => {
+                    console.log(data)
+                    conversation.push({
+                        role: "user",
+                        content: text
+                    })
+                
+                    conversation.push({
+                        role: "system",
+                        content: data["resp"]
+                    })
+                    remove_chat_bubbles()
+                    submit_system_chat_UI(data["resp"])
+                });
+        }
+
+
+        function get_bot_message_html(text){
+            return `
+            <div class="media media-chat">
+            <i class="bi bi-person"></i>
+            <div class="media-body">
+                <p>${text}</p>
+            </div>
+            </div>`
+        }
+
+        function get_user_message_html(text){
+            return `
+                <div class="media media-chat media-chat-reverse">
+                    <div class="media-body">
+                        <p>${text}</p>
+                    </div>
+                </div>
+            `
+        }
+
+        function submit_user_chat_UI(text){
+            content = document.getElementById("chat-content")
+            messageNode = document.createElement("div")
+            if(lastChatter == "user"){
+                if(content.children.length > 0){
+                    messageNode = document.createElement("p")
+                    messageNode.innerHTML = `${text}`
+                    content.children[content.children.length - 1].children[0].children[0].appendChild(messageNode)
+                }
+            }else{
+                messageNode.innerHTML = get_user_message_html(text)
+                content.appendChild(messageNode)
+                lastChatter = "user"
+            }
+
+            make_engine_request(text)
+        }
+
+        function detect_and_embed_url(text){
+            var urlRegex = /(https?:\/\/[^\s]+)/g;
+            if(urlRegex.test(text)){
+                return text.replace(urlRegex, function(url) {
+                return `
+                    <iframe width="560" height="315" src="${url}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                    `
+            })} else{
+                return text
+            }
+        }
+
+        function submit_system_chat_UI(text){
+            content = document.getElementById("chat-content")
+            messageNode = document.createElement("div")
+            messageNode.classList.add("mt-5")
+
+            text = detect_and_embed_url(text)
+
+            messageNode.innerHTML = get_bot_message_html(text)
+            content.appendChild(messageNode)
+            lastChatter = "system"
+            
+            document.getElementById("chat-content").scroll(0,100000)
+        }
+
+        function add_chat_bubbles(){
+            if(!chatBubblesPresent){
+                content = document.getElementById("chat-content")
+                messageNode = document.createElement("div")
+                messageNode.classList.add("mt-5")
+                messageNode.id = "bubbles"
+
+                messageNode.innerHTML = chat_bubble_html()
+                content.appendChild(messageNode)
+                
+                chatBubblesPresent = true
+            }
+            document.getElementById("chat-content").scroll(0,100000)
+        }
+
+        function remove_chat_bubbles(){
+            if(chatBubblesPresent){
+                document.getElementById("bubbles").remove();
+                chatBubblesPresent = false
+            }
+        }
+
+        function userMessageSubmit(ele) {
+            if(this.event.key === 'Enter') {
+                submit_user_chat_UI(ele.value);
+                ele.value = "" 
+            }
+        }
+
+
+        function chat_bubble_html(){
+            return `
+            <div id="AloeBubbles" class="typing">
+                <span class="circle bouncing"></span>
+                <span class="circle bouncing"></span>
+                <span class="circle bouncing"></span>
+            </div>`
+        }
+
+    </script>
+
+</body>
+</html>
