@@ -1,0 +1,8 @@
+requests
+openai
+python-dotenv>=0.19.2
+authlib>=1.0
+flask
+pymongo
+boto3
+waitress
