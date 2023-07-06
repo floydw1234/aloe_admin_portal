@@ -86,5 +86,5 @@ if __name__ == "__main__":
     if args.get("--prod", 'n').lower() == 'y': 
         app.run(host="0.0.0.0",port=80, debug=False)
     else:
-        app.run(host="0.0.0.0",port=5000, debug=True, ssl_context='adhoc')
+        app.run(host="0.0.0.0",port=5000, debug=True, ssl_context=("cert.pem", "key.pem"))
 
