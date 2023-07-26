@@ -1,5 +1,6 @@
 import json
 from sys import argv
+from datetime import datetime
 from os import environ as env
 from dotenv import find_dotenv, load_dotenv
 from urllib.parse import quote_plus, urlencode
@@ -7,7 +8,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import boto3
 from authlib.integrations.flask_client import OAuth
-from flask import Flask, redirect, render_template, session, url_for, jsonify
+from flask import Flask, redirect, render_template, session, url_for, jsonify, request
 
 from utils import get_args_dict
 
@@ -20,6 +21,7 @@ client = MongoClient(conn_string, server_api=ServerApi('1'))
 
 db = client.get_database("Aloe_mvp")
 leads_coll = db.get_collection("leads")
+library_coll = db.get_collection("library")
 
 app = Flask(__name__)
 app.secret_key = env.get("APP_SECRET_KEY")
@@ -48,10 +50,30 @@ def get_leads():
     output = []
     cursor = leads_coll.find({})
     for doc in cursor:
-        print(doc)
         del doc["_id"]
         output.append(doc)
     return jsonify(output)
+
+@app.route("/get_library", methods=['GET'])
+def get_library():
+    output = []
+    cursor = library_coll.find({})
+    for doc in cursor:
+        del doc["_id"]
+        output.append(doc)
+    return jsonify(output)
+
+@app.route("/insert_library_item", methods=['POST'])
+def post_library():
+    item = request.get_json()
+    item["updated_by"] = session["user"]["userinfo"]["email"]
+    item["updated"] = datetime.now()
+    item["created"] = datetime.now()
+    item["client_id"] = 1
+    item["demo_id"] = 1
+    
+    library_coll.insert_one(item)
+    return jsonify({"status": "ok"})
 
 @app.route("/login")
 def login():
