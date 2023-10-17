@@ -22,6 +22,9 @@ client = MongoClient(conn_string, server_api=ServerApi('1'))
 db = client.get_database("Aloe_mvp")
 leads_coll = db.get_collection("leads")
 library_coll = db.get_collection("library")
+user_coll = db.get_collection("Users")
+demo_coll = db.get_collection("demos")
+question_coll = db.get_collection("demo_questions")
 
 app = Flask(__name__)
 app.secret_key = env.get("APP_SECRET_KEY")
@@ -42,7 +45,15 @@ oauth.register(
 
 @app.route("/")
 def main_page():
-    return render_template("index.html", session=session, pretty=json.dumps(session.get('user'), indent=4))
+    
+    email = (session.get("user").get("userinfo").get("email"))
+
+    user = user_coll.find_one({"email":email})
+
+    if user:
+        return render_template("index.html", client_id=user.get("client_id") , session=session, pretty=json.dumps(session.get('user'), indent=4))
+    else:
+        return render_template("403.html")
 
 
 @app.route("/get_leads", methods=['GET'])
@@ -54,23 +65,36 @@ def get_leads():
         output.append(doc)
     return jsonify(output)
 
-@app.route("/get_library", methods=['GET'])
-def get_library():
+@app.route("/get_library/<client_id>", methods=['GET'])
+def get_library(client_id):
     output = []
-    cursor = library_coll.find({})
+    cursor = library_coll.find({"client_id": int(client_id)})
     for doc in cursor:
         del doc["_id"]
         output.append(doc)
     return jsonify(output)
 
+
+@app.route("/get_demos/<client_id>", methods=['GET'])
+def get_demos(client_id):
+    output = []
+    cursor = demo_coll.find({"client_id": int(client_id)})
+    for doc in cursor:
+        del doc["_id"]
+        for question in doc.get("questions", []):
+            question = question_coll.find_one({"_id":question}).get("question")
+        output.append(doc)
+    return jsonify(output)
+
+
 @app.route("/insert_library_item", methods=['POST'])
 def post_library():
+    email = (session.get("user").get("userinfo").get("email"))
     item = request.get_json()
     item["updated_by"] = session["user"]["userinfo"]["email"]
     item["updated"] = datetime.now()
     item["created"] = datetime.now()
-    item["client_id"] = 1
-    item["demo_id"] = 1
+    item["client_id"] = user_coll.find_one({"email":email}).get("client_id")
     
     library_coll.insert_one(item)
     return jsonify({"status": "ok"})
