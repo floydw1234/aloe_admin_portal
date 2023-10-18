@@ -97,7 +97,7 @@ def update_demos():
         if new_item.get("_id"):
             demo_coll.replace_one({"_id": new_item.get("_id")}, new_item)
         else:
-            new_item["_id"] = random.getrandbits(32)
+            new_item["_id"] = str(random.getrandbits(32))
             demo_coll.insert_one(new_item)
         return jsonify({"status":"ok"})
     else:
