@@ -10,7 +10,7 @@ import boto3
 from bson.json_util import dumps, loads
 from authlib.integrations.flask_client import OAuth
 from flask import Flask, redirect, render_template, session, url_for, jsonify, request
-
+import random
 from utils import get_args_dict
 
 ENV_FILE = find_dotenv()
@@ -97,6 +97,7 @@ def update_demos():
         if new_item.get("_id"):
             demo_coll.replace_one({"_id": new_item.get("_id")}, new_item)
         else:
+            new_item["_id"] = random.getrandbits(32)
             demo_coll.insert_one(new_item)
         return jsonify({"status":"ok"})
     else:
