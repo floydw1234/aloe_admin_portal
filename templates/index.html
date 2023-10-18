@@ -53,6 +53,8 @@
         <div class="logo">
           <img src="static/logos/aloe_logo.svg" alt="Logo" width="100">
         </div>
+
+        <h3>{{client_name}}</h3>
         <div>
           <a href="/logout"><button type="button" class="btn btn-outline-primary">Logout</button></a>
         </div>
@@ -79,7 +81,7 @@
           <div class="tab-pane fade show active" id="view1">
             <div class="header">
               <h1>Demos</h1>
-              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#demoModal">new<i class="bi bi-plus"></i> </button>
+              <button class="btn btn-primary" id="newDemo" onclick="update_demo_questions_html([])" data-bs-toggle="modal" data-bs-target="#demoModal">new<i class="bi bi-plus"></i> </button>
             </div>
             <div id="demos_body">
             </div>
@@ -145,61 +147,61 @@
           </div>
         </div>
       </div>
-
-
-
-
       
       <!-- Demo Modal -->
       <div class="modal fade" id="demoModal" tabindex="-1" aria-labelledby="demoModalLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">New Content</h5>
+              <h5 class="modal-title" id="exampleModalLabel">Demo</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
               <div class="input-group mb-3">
                 <span class="input-group-text" id="basic-addon3">Title</span>
-                <input type="text" class="form-control library_input" name="title" id="title" aria-describedby="basic-addon3">
+                <input type="text" class="form-control demo_input" name="title" id="demo_title" aria-describedby="basic-addon3">
               </div>
 
-              <div class="input-group">
-                <div id="demo_questions">
+              <input hidden id="demo_id"></input>
+
+              <div id="demo_questions">
                   <span class="input-group-text" id="basic-addon1">Questions:</span>
-                  <div class="mb-3">
-                    <div class="input-group">
-                      <span class="input-group-text" id="basic-addon1">1</span>
-                      <input type="text" class="form-control" placeholder="question" aria-label="Username" aria-describedby="basic-addon1">
-                      <span class="input-group-text"><button class="btn">+</button></span>
-                    </div>
-                    <ul class="list-group">
-                      <li class="list-group-item"><input value="test" class="form-control"></input></li>
-                      <li class="list-group-item">A second item</li>
-                    </ul>
+                    
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">1</span>
+                    <textarea maxlength="140" class="form-control" aria-label="With textarea"></textarea>
+                    <span class="input-group-text"><button class="btn"><i class="bi bi-trash"></i></button></span>
                   </div>
                   
                   <div class="input-group mb-3">
                     <span class="input-group-text" id="basic-addon1">2</span>
-                    <input type="text" class="form-control" placeholder="question" aria-label="Username" aria-describedby="basic-addon1">
-                    <span class="input-group-text"><button class="btn">+</button></span>
+                    <textarea maxlength="140" class="form-control" aria-label="With textarea"></textarea>
+                    <span class="input-group-text"><button class="btn"><i class="bi bi-trash"></i></button></span>
                   </div>
-                </div>
+                  
+                  <button id="addQuestion" class="btn btn-primary mb-3">+</button>
+
+              </div>
+
+              <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-desc">Status</span>
+                <select class="form-select demo_input" name="status" id="demoStatus">
+                  <option selected>Choose...</option>
+                  <option value="active">active</option>
+                  <option value="paused">paused</option>
+                </select>
               </div>
 
               <div class="input-group">
-                <span class="input-group-text" id="basic-desc">Status</span>
-                <select class="custom-select library_input" name="content_type" id="inputGroupSelect02">
-                  <option selected>Choose...</option>
-                  <option value="1">active</option>
-                  <option value="2">paused</option>
-                </select>
+                <span class="input-group-text">Other Notes</span>
+                <textarea id="demoNotes" maxlength="140" class="form-control demo_input" name="notes" aria-label="With textarea"></textarea>
               </div>
               
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary" id="new_library_submit">Save changes</button>
+              <button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="demo_delete">Delete</button>
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="demo_submit">Save changes</button>
             </div>
           </div>
         </div>
@@ -282,11 +284,13 @@
 
     var new_library_item = {}
 
+    var demos = []
+    var current_demo_index = -1
+
     $(document).ready(function() {
         get_leads()
         get_demos()
         get_library()
-        initialize_listeners()
 
     });
 
@@ -308,13 +312,123 @@
             `;
             tableBody.appendChild(row);
             });
+            initialize_library_listeners()
         })
         .catch(error => {
             console.error('Error:', error);
         });
     }
 
-    function initialize_listeners(){
+    function initialize_demo_listeners(){
+      //demo question delete
+      $("#newDemo").on("click",()=>{
+        current_demo_index = demos.length
+        demos.push({"questions":['']})
+        $("#demoNotes").val("")
+
+        $("#demoStatus").val("")
+
+        $("#demo_title").val("")
+      })
+      $(".demo_edit").on("click", (e)=>{
+        $("#demo_submit").attr("disabled", false)
+        current_demo_index = e.currentTarget.getAttribute("demo-index")
+        if(demos[current_demo_index].questions){
+          update_demo_questions_html(demos[current_demo_index].questions)
+        }
+
+        $("#demoNotes").val(demos[current_demo_index].notes)
+
+        $("#demoStatus").val(demos[current_demo_index].status)
+
+        $("#demo_title").val(demos[current_demo_index].title)
+
+        $("#demoModal").modal("show")
+      })
+      //save demo
+      $("#demo_submit").on("click", (e)=>{
+        console.log(demos)
+        $("#demo_submit").attr("disabled", true)
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(demos[current_demo_index])
+          };
+        fetch("/update_demo", requestOptions)
+        .then(response => response.json())
+        .then((data)=>{
+          console.log(data)
+
+          
+          setTimeout(()=>{
+            get_demos()
+          }, 2000)
+        })
+        
+      })
+
+      $("#demo_delete").on("click", (e)=>{
+        $("#demo_submit").attr("disabled", true)
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(demos[current_demo_index])
+          };
+        fetch("/delete_demo", requestOptions)
+        .then(response => response.json())
+        .then((data)=>{
+          console.log(data)
+          setTimeout(()=>{
+            get_demos()
+          }, 2000)
+        })
+        
+      })
+    }
+
+    function initialize_leads_listeners(){
+
+    }
+
+    function initialize_demo_modal_listeners(){
+
+      $(".demo_input").change((e)=>{
+        current_demo = demos[current_demo_index]
+        current_demo[e.target.name] = e.target.value
+        console.log(current_demo)
+      })
+
+      $(".demo_question_input").change((e)=>{
+        q_index = e.target.getAttribute("question-index")
+        current_demo = demos[current_demo_index]
+        current_demo.questions[q_index] = e.target.value
+        console.log(current_demo)
+      })
+
+
+      $(".remove_question").on("click", (e)=>{
+          current_demo = demos[current_demo_index]
+          questionIndex = e.currentTarget.getAttribute("question-index")
+          current_demo.questions.splice(questionIndex, 1)
+
+          update_demo_questions_html(current_demo.questions)
+      })
+
+      $("#addQuestion").on("click", (e)=>{
+          current_demo = demos[current_demo_index]
+          console.log(current_demo)
+          questionIndex = e.currentTarget.getAttribute("question-index")
+          current_demo.questions.push("")
+
+          update_demo_questions_html(current_demo.questions)
+      })
+    }
+
+    function initialize_library_listeners(){
       $(".library_input").change((e)=>{
         new_library_item[e.target.name] = e.target.value
       })
@@ -339,6 +453,35 @@
       })
     }
 
+    function update_demo_questions_html(questions){
+      console.log(questions)
+      output = ""
+      for(var i=0; i < questions.length; i++){
+        output += `
+          <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">${i+1}</span>
+            <textarea id="demo_question_${i}" question-index="${i}" maxlength="140" class="form-control demo_question_input" aria-label="With textarea">${questions[i]}</textarea>
+            <span class="input-group-text"><button id="remove_question_${i}" question-index="${i}" class="btn remove_question"><i class="bi bi-trash"></i></button></span>
+          </div>
+        `
+
+      }
+      if(!output){
+        output += `
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="basic-addon1">1</span>
+          <textarea id="demo_question_0" question-index="0" maxlength="140" class="form-control demo_question_input" aria-label="With textarea"></textarea>
+          <span class="input-group-text"><button id="remove_question_0" question-index="0" class="btn remove_question"><i class="bi bi-trash"></i></button></span>
+        </div>
+        `
+      }
+      output += `<button id="addQuestion" class="btn btn-primary mb-3">+</button>`
+
+      $("#demo_questions").html(output)
+
+      initialize_demo_modal_listeners()
+    }
+
 
     function get_demos(){
       fetch('/get_demos/'+client_id)
@@ -346,16 +489,16 @@
         .then(data => {
             const demos_body = document.getElementById('demos_body');
             html = ""
+            demos = data
             //<button class="btn btn-primary">copy</button>
             //<button class="btn btn-primary">options</button>
-            data.forEach(item => {
-              console.log(item)
+            data.forEach((item, index) => {
               html += `
                   <div class="card shadow-sm p-3 mb-5 bg-white rounded">
                       <div class="header">
                         <h3>${item.title}</h3>
                         <div class="header-buttons">
-                          <button class="btn btn-primary"><i class="bi bi-pencil-square"></i></button>
+                          <button id="demo_edit_${index}" demo-index="${index}" class="btn btn-primary demo_edit"><i class="bi bi-pencil-square"></i></button>
 
                         </div>
                       </div>
@@ -376,6 +519,7 @@
                 `;
             });
             demos_body.innerHTML = html;
+            initialize_demo_listeners()
         })
         .catch(error => {
             console.error('Error:', error);
@@ -383,7 +527,12 @@
     }
 
     function capitalizeFirstLetter(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
+        if(string){
+          return string.charAt(0).toUpperCase() + string.slice(1);
+        }else{
+          return string
+        }
+        
     }
 
     function get_leads(){
@@ -403,6 +552,7 @@
             `;
             tableBody.appendChild(row);
             });
+            initialize_leads_listeners()
         })
         .catch(error => {
             console.error('Error:', error);

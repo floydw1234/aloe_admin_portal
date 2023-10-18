@@ -7,6 +7,7 @@ from urllib.parse import quote_plus, urlencode
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import boto3
+from bson.json_util import dumps, loads
 from authlib.integrations.flask_client import OAuth
 from flask import Flask, redirect, render_template, session, url_for, jsonify, request
 
@@ -25,7 +26,7 @@ library_coll = db.get_collection("library")
 user_coll = db.get_collection("Users")
 demo_coll = db.get_collection("demos")
 question_coll = db.get_collection("demo_questions")
-
+client_col = db.get_collection("clients")
 app = Flask(__name__)
 app.secret_key = env.get("APP_SECRET_KEY")
 
@@ -46,14 +47,14 @@ oauth.register(
 @app.route("/")
 def main_page():
     
-    email = (session.get("user").get("userinfo").get("email"))
+    email = (session.get("user", {}).get("userinfo", {}).get("email"))
+    if email:
+        user = user_coll.find_one({"email":email})
+        if user:
+            client_id = user.get("client_id")
+            return render_template("index.html", client_id= client_id,client_name=client_col.find_one({"_id":client_id }).get("name"),session=session, pretty=json.dumps(session.get('user'), indent=4))
 
-    user = user_coll.find_one({"email":email})
-
-    if user:
-        return render_template("index.html", client_id=user.get("client_id") , session=session, pretty=json.dumps(session.get('user'), indent=4))
-    else:
-        return render_template("403.html")
+    return render_template("403.html")
 
 
 @app.route("/get_leads", methods=['GET'])
@@ -80,12 +81,32 @@ def get_demos(client_id):
     output = []
     cursor = demo_coll.find({"client_id": int(client_id)})
     for doc in cursor:
-        del doc["_id"]
-        for question in doc.get("questions", []):
-            question = question_coll.find_one({"_id":question}).get("question")
         output.append(doc)
-    return jsonify(output)
+    
+    return dumps(output)
 
+@app.route("/update_demo", methods=['POST'])
+def update_demos():
+    new_item = loads(json.dumps(request.get_json()))
+
+    email = (session.get("user", {}).get("userinfo", {}).get("email"))
+    if email:
+        user = user_coll.find_one({"email":email})
+        print(new_item)
+        new_item["client_id"] = user.get("client_id")
+        if new_item.get("_id"):
+            demo_coll.replace_one({"_id": new_item.get("_id")}, new_item)
+        else:
+            demo_coll.insert_one(new_item)
+        return jsonify({"status":"ok"})
+    else:
+        return jsonify({"status":"error 403"})
+
+@app.route("/delete_demo", methods=['POST'])
+def delete_demos():
+    item = loads(json.dumps(request.get_json()))
+    demo_coll.delete_one({"_id": item.get("_id")})
+    return jsonify({"status":"ok"})
 
 @app.route("/insert_library_item", methods=['POST'])
 def post_library():
