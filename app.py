@@ -59,12 +59,20 @@ def main_page():
 
 @app.route("/get_leads", methods=['GET'])
 def get_leads():
-    output = []
-    cursor = leads_coll.find({})
-    for doc in cursor:
-        del doc["_id"]
-        output.append(doc)
-    return jsonify(output)
+    email = (session.get("user", {}).get("userinfo", {}).get("email"))
+    print(email)
+    if email:
+        user = user_coll.find_one({"email":email})
+        print(user)
+        if user:
+            output = []
+            cursor = leads_coll.find({"client_id":user.get("client_id")})
+            for doc in cursor:
+                del doc["_id"]
+                output.append(doc)
+            print(output)
+            return jsonify(output)
+    return jsonify({"status":"not authorized"}), 403
 
 @app.route("/get_library/<client_id>", methods=['GET'])
 def get_library(client_id):
