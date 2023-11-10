@@ -90,17 +90,10 @@
             <div class="header">
                 <h1>Leads</h1>
                 <div class="header-buttons">
-                  <div class="dropdown d-inline">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="bi bi-filter"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                      <li><a class="dropdown-item" href="#">company</a></li>
-                      <li><a class="dropdown-item" href="#">Option 2</a></li>
-                      <li><a class="dropdown-item" href="#">Option 3</a></li>
-                    </ul>
-                  </div>
+                  
+                  <button id="refresh_leads_btn" onclick="refresh_leads()" class="btn btn-secondary"><i class="bi bi-arrow-clockwise"></i></button>
                   <button class="btn btn-primary">Download CSV</button>
+                  
                 </div>
             </div>
             <table class="table">
@@ -293,6 +286,17 @@
         get_library()
 
     });
+
+    function refresh_leads(){
+      $("#refresh_leads_btn").html(`<div class="spinner-border spinner-border-sm" role="status"><span class="sr-only"></span></div>`)
+      const tableBody = document.getElementById('leadTableBody');
+      fetch('/extract_form_data/'+client_id)
+        .then(response => response.json())
+        .then(data => {
+          setTimeout(()=>{get_leads()}, 1000) 
+        })
+
+    }
 
     function get_library(){
       fetch('/get_library/'+client_id)
@@ -541,6 +545,8 @@
         .then(response => response.json())
         .then(data => {
             const tableBody = document.getElementById('leadTableBody');
+            tableBody.innerHTML = ""
+            $("#refresh_leads_btn").html(`<i class="bi bi-arrow-clockwise"></i>`)
             data.forEach(item => {
             const row = document.createElement('tr');
             row.innerHTML = `

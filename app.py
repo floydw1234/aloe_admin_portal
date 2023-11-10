@@ -6,7 +6,7 @@ from dotenv import find_dotenv, load_dotenv
 from urllib.parse import quote_plus, urlencode
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-import boto3
+import requests
 from bson.json_util import dumps, loads
 from authlib.integrations.flask_client import OAuth
 from flask import Flask, redirect, render_template, session, url_for, jsonify, request
@@ -128,6 +128,12 @@ def post_library():
     
     library_coll.insert_one(item)
     return jsonify({"status": "ok"})
+
+@app.route("/extract_form_data/<client_id>", methods=["GET"])
+def extract_info(client_id):
+    
+    resp = requests.get("http://localhost:10000/extract_form_data/"+str(client_id))
+    return jsonify(resp.json())
 
 @app.route("/login")
 def login():
