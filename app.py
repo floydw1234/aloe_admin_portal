@@ -93,6 +93,21 @@ def get_demos(client_id):
     
     return dumps(output)
 
+
+@app.route("/demo_edit/<demo_id>")
+def demo_edit_view(demo_id):
+    email = (session.get("user", {}).get("userinfo", {}).get("email"))
+    if email:
+        user = user_coll.find_one({"email":email})
+        demo = demo_coll.find_one({"_id": str(demo_id)})
+        if str(demo.get("client_id")) != str(user.get("client_id")):
+            return jsonify({"status":"error 403"})
+        else:
+            return render_template("demo_edit.html", demo=demo,client_id= user.get("client_id"),client_name=client_col.find_one({"_id":user.get("client_id") }).get("name"))
+    else:
+        return jsonify({"status":"error 403"})
+
+
 @app.route("/update_demo", methods=['POST'])
 def update_demos():
     new_item = loads(json.dumps(request.get_json()))
