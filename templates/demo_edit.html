@@ -172,6 +172,57 @@
     let offsetX = 0;
     let offsetY = 0;
 
+    function draw_rect(){
+      // Set the radius for the rounded edges
+      const cornerRadius = 20;
+
+      // Set the dimensions of the rectangle
+      const width = 400;
+      const height = 200;
+
+      // Calculate the coordinates for the rounded corners
+      const xTopLeft = 10;
+      const yTopLeft = 10;
+      const xTopRight = xTopLeft + width;
+      const yTopRight = yTopLeft;
+      const xBottomRight = xTopRight;
+      const yBottomRight = yTopRight + height;
+      const xBottomLeft = xTopLeft;
+      const yBottomLeft = yTopLeft + height;
+
+      // Begin the path
+      ctx.beginPath();
+
+      // Move to the starting point (top-left corner)
+      ctx.moveTo(xTopLeft + cornerRadius, yTopLeft);
+
+      // Draw the top line and top-right corner
+      ctx.lineTo(xTopRight - cornerRadius, yTopRight);
+      ctx.arcTo(xTopRight, yTopRight, xTopRight, yTopRight + cornerRadius, cornerRadius);
+
+      // Draw the right line and bottom-right corner
+      ctx.lineTo(xBottomRight, yBottomRight - cornerRadius);
+      ctx.arcTo(xBottomRight, yBottomRight, xBottomRight - cornerRadius, yBottomRight, cornerRadius);
+
+      // Draw the bottom line and bottom-left corner
+      ctx.lineTo(xBottomLeft + cornerRadius, yBottomLeft);
+      ctx.arcTo(xBottomLeft, yBottomLeft, xBottomLeft, yBottomLeft - cornerRadius, cornerRadius);
+
+      // Draw the left line and top-left corner
+      ctx.lineTo(xTopLeft, yTopLeft + cornerRadius);
+      ctx.arcTo(xTopLeft, yTopLeft, xTopLeft + cornerRadius, yTopLeft, cornerRadius);
+
+      // Close the path
+      ctx.closePath();
+
+      // Set the fill style to a blank color (you can set it to 'white' or any other color)
+      ctx.fillStyle = 'white';
+
+      // Fill the path
+      ctx.fill();
+
+    }
+
     function draw() {
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
       ctx.save();
@@ -203,8 +254,11 @@
       }
 
       ctx.restore();
+
+      draw_rect();
     }
     draw();
+    
 
     function updateScale(delta) {
       const zoomSpeed = 0.1;
