@@ -16,26 +16,28 @@
 
 
 
+
 <style>
-    body {
-      margin: 0;
-      overflow: hidden;
+
+    .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    }
+    .logo {
+    font-weight: bold;
+    }
+    .btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited {
+        background-color: #5c4cfc !important;
+        border-color: #5c4cfc !important;
     }
 
-    #canvas-container {
-      overflow: hidden;
-      width: 100vw;
-      height: 100vh;
+    #myContainer {
+      overflow: auto;
     }
-
-    #myCanvas {
-      border: 1px solid #000;
-      cursor: grab;
-      user-select: none;
-    }
-
-    #myCanvas:active {
-      cursor: grabbing;
+    canvas {
+      background-color: white;
     }
     
 
@@ -58,7 +60,7 @@
     {% if session %}
     <div class="header ml-5">
         <div class="logo">
-          <img src="static/logos/aloe_logo.svg" alt="Logo" width="100">
+          <img src="/static/logos/aloe_logo.svg" alt="Logo" width="100">
         </div>
 
         <h3>{{client_name}}</h3>
@@ -66,12 +68,10 @@
           <a href="/logout"><button type="button" class="btn btn-outline-primary">Logout</button></a>
         </div>
       </div>
-    <div class="container">
-    
-        <p> {{ demo["_id"] }}</p>
-        <div id="canvas-container">
-            <canvas id="myCanvas" width="800" height="600"></canvas>
-        </div>
+    <div class="container justify-content-center">
+      <div class="container" id="myContainer">
+        <canvas id="myCanvas"></canvas>
+      </div>
 
     </div>
     {% else %}
@@ -153,67 +153,131 @@
         $(`#${button_id}`).html(text)
     }
 
+    const container = document.getElementById('myContainer');
     const canvas = document.getElementById('myCanvas');
     const ctx = canvas.getContext('2d');
-    let scaleFactor = 1;
-    let isDragging = false;
-    let startDragX, startDragY;
 
-    // Function to handle zooming
-    function handleZoom(event) {
-      if (event.deltaY > 0) {
-        scaleFactor -= 0.1;
-      } else {
-        scaleFactor += 0.1;
+    // Set the size of the canvas
+    const canvasWidth = 1200;
+    const canvasHeight = 800;
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    const gridSize = 50; // Size of grid squares
+
+    let isDragging = false;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+    let scale = 1;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    function draw() {
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      ctx.save();
+
+      // Translate and scale the context
+      ctx.translate(offsetX, offsetY);
+      ctx.scale(scale, scale);
+
+      // Calculate the start and end points for gridlines outside the canvas
+      const startX = Math.floor(-offsetX / gridSize) * gridSize;
+      const startY = Math.floor(-offsetY / gridSize) * gridSize;
+      const endX = startX + canvasWidth / scale;
+      const endY = startY + canvasHeight / scale;
+
+      // Draw gridlines
+      ctx.strokeStyle = '#ddd';
+      ctx.lineWidth = 1;
+      for (let x = startX; x < endX; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, startY);
+        ctx.lineTo(x, endY);
+        ctx.stroke();
+      }
+      for (let y = startY; y < endY; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(startX, y);
+        ctx.lineTo(endX, y);
+        ctx.stroke();
       }
 
-      // Set a maximum and minimum zoom level
-      scaleFactor = Math.max(0.1, Math.min(scaleFactor, 3));
+      ctx.restore();
+    }
+    draw();
 
-      draw(); // Redraw the content with the new zoom level
+    function updateScale(delta) {
+      const zoomSpeed = 0.1;
+      scale += delta * zoomSpeed;
+      if (scale < 0.1) scale = 0.1;
+      if (scale > 5) scale = 5;
+      draw();
     }
 
-    // Function to handle dragging
-    function handleDragStart(event) {
+    function updateOffset(x, y) {
+      offsetX += x;
+      offsetY += y;
+      draw();
+    }
+
+    function handleMouseWheel(event) {
+      const delta = Math.sign(event.deltaY);
+      updateScale(delta);
+    }
+
+    function handleMouseDown(event) {
       isDragging = true;
-      startDragX = event.clientX - canvas.offsetLeft;
-      startDragY = event.clientY - canvas.offsetTop;
+      lastMouseX = event.clientX;
+      lastMouseY = event.clientY;
     }
 
-    function handleDragMove(event) {
-      if (!isDragging) return;
-
-      const offsetX = event.clientX - canvas.offsetLeft - startDragX;
-      const offsetY = event.clientY - canvas.offsetTop - startDragY;
-
-      canvas.scrollLeft -= offsetX;
-      canvas.scrollTop -= offsetY;
-    }
-
-    function handleDragEnd() {
+    function handleMouseUp(event) {
       isDragging = false;
     }
 
-    // Function to draw content on the canvas
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw your content here, scaled by the zoom factor
-      ctx.fillStyle = 'blue';
-      ctx.fillRect(50 * scaleFactor, 50 * scaleFactor, 100 * scaleFactor, 100 * scaleFactor);
+    function handleMouseMove(event) {
+      if (isDragging) {
+        const deltaX = event.clientX - lastMouseX;
+        const deltaY = event.clientY - lastMouseY;
+        lastMouseX = event.clientX;
+        lastMouseY = event.clientY;
+        updateOffset(deltaX, deltaY);
+      }
     }
 
-    // Event listeners for zooming
-    document.getElementById('canvas-container').addEventListener('wheel', handleZoom);
+    function handleTouchStart(event) {
+      event.preventDefault();
+      const touch = event.touches[0];
+      isDragging = true;
+      lastMouseX = touch.clientX;
+      lastMouseY = touch.clientY;
+    }
 
-    // Event listeners for dragging
-    canvas.addEventListener('mousedown', handleDragStart);
-    window.addEventListener('mousemove', handleDragMove);
-    window.addEventListener('mouseup', handleDragEnd);
+    function handleTouchMove(event) {
+      event.preventDefault();
+      if (isDragging) {
+        const touch = event.touches[0];
+        const deltaX = touch.clientX - lastMouseX;
+        const deltaY = touch.clientY - lastMouseY;
+        lastMouseX = touch.clientX;
+        lastMouseY = touch.clientY;
+        updateOffset(deltaX, deltaY);
+      }
+    }
 
-    // Initial canvas setup
-    draw();
+    function handleTouchEnd(event) {
+      event.preventDefault();
+      isDragging = false;
+    }
 
+    // Add event listeners
+    container.addEventListener('wheel', handleMouseWheel);
+    container.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
+    container.addEventListener('mousemove', handleMouseMove);
+    container.addEventListener('touchstart', handleTouchStart);
+    container.addEventListener('touchmove', handleTouchMove);
+    window.addEventListener('touchend', handleTouchEnd);
 
     
 </script>
