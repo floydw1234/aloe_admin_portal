@@ -158,8 +158,8 @@
     const ctx = canvas.getContext('2d');
 
     // Set the size of the canvas
-    const canvasWidth = 1200;
-    const canvasHeight = 800;
+    const canvasWidth = 5000;
+    const canvasHeight = 5000;
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
 
@@ -174,22 +174,21 @@
 
     function draw_rect(){
       // Set the radius for the rounded edges
-      const cornerRadius = 20;
+      const cornerRadius = 20 * scale;
 
       // Set the dimensions of the rectangle
-      const width = 400;
-      const height = 200;
+      const width = 400 * scale;
+      const height = 200 * scale;
 
       // Calculate the coordinates for the rounded corners
-      const xTopLeft = 10;
-      const yTopLeft = 10;
+      const xTopLeft = 10 + offsetX;
+      const yTopLeft = 10 + offsetY;
       const xTopRight = xTopLeft + width;
       const yTopRight = yTopLeft;
       const xBottomRight = xTopRight;
       const yBottomRight = yTopRight + height;
       const xBottomLeft = xTopLeft;
       const yBottomLeft = yTopLeft + height;
-
       // Begin the path
       ctx.beginPath();
 
@@ -221,9 +220,24 @@
       // Fill the path
       ctx.fill();
 
+      ctx.strokeStyle = "rgb(0 0 0 / 50%)";
+      ctx.lineWidth = 1; // Adjust the line width as needed
+
+      ctx.stroke();
+
     }
 
+    tree_elements = [{}]
+
     function draw() {
+      draw_canvas();
+      tree_elements.forEach((tree_el)=>{
+          draw_tree_element(tree_el)
+      })
+    }
+
+
+    function draw_canvas(){
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
       ctx.save();
 
@@ -254,9 +268,12 @@
       }
 
       ctx.restore();
-
-      draw_rect();
     }
+    
+    function draw_tree_element(element){
+      draw_rect()
+    }
+
     draw();
     
 
