@@ -17,19 +17,63 @@ let scale = 1;
 let offsetX = -canvasWidth / 2 + 450;
 let offsetY = 20;
 
-var node = {
-    x:"",
-    y:"",
-    height:"",
-    width:"",
+
+
+var nodes = [{
+    nodeId:"",
+    x: 600,
+    y: 2,
+    height:200,
+    width:300,
+    line_color:"rgb(0 0 0 / 50%)",
+    background_color:"white",
     text:"",
     type:"",
     icon:"",
     click:"",
-}
+},{
+    nodeId:"",
+    x: 200,
+    y: 2,
+    height:200,
+    width:300,
+    line_color:"rgb(0 0 0 / 50%)",
+    background_color:"white",
+    text:"",
+    type:"",
+    icon:"",
+    click:"",
+},
+{
+    nodeId:"",
+    x: 200,
+    y: 400,
+    height:200,
+    width:300,
+    line_color:"rgb(0 0 0 / 50%)",
+    background_color:"white",
+    text:"",
+    type:"",
+    icon:"",
+    click:"",
+}]
+
+var branches = [{
+    parentNodeId:"",
+    start_x: 600,
+    start_y: 300,
+    end_x:400,
+    end_y:500,
+    color:"rgb(0 0 0 / 50%)",
+}]
+
 
 
 function draw_initializer_node(x,y){
+
+}
+
+function draw_plus(node){
 
 }
 
@@ -47,21 +91,40 @@ function draw_empty_branches(prev_node){
 }
 
 function draw_filled_node(text, icon){
+    
+}
+
+
+function draw_branch({start_x, start_y, end_x, end_y, color}){
+    ctx.beginPath();
+    start_x = (start_x + offsetX) * scale
+    start_y = (start_y + offsetY) * scale
+    end_x = (end_x + offsetX) * scale
+    end_y = (end_y + offsetY) * scale
+    let height = end_y-start_y
+    ctx.moveTo(start_x, start_y);
+    // ctx.lineTo(start_x, start_y);
+    // ctx.lineTo(end_x, start_y );
+    ctx.lineTo(end_x, end_y);
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2; // Adjust the line width as needed
+    ctx.stroke();
 
 }
 
 
-function draw_rect() {
+function draw_rect(start_x,start_y,start_width,start_height,line_color, background_color) {
     // Set the radius for the rounded edges
     const cornerRadius = 20 * scale;
 
     // Set the dimensions of the rectangle
-    const width = 300 * scale;
-    const height = 200 * scale;
+    const width = start_width * scale;
+    const height = start_height * scale;
 
     // Calculate the coordinates for the rounded corners
-    const xTopLeft = canvasWidth / 2 + offsetX;
-    const yTopLeft = 2 + offsetY;
+    const xTopLeft = start_x + offsetX;
+    const yTopLeft = start_y + offsetY;
     const xTopRight = xTopLeft + width;
     const yTopRight = yTopLeft;
     const xBottomRight = xTopRight;
@@ -94,24 +157,25 @@ function draw_rect() {
     ctx.closePath();
 
     // Set the fill style to a blank color (you can set it to 'white' or any other color)
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = background_color;
 
     // Fill the path
     ctx.fill();
 
-    ctx.strokeStyle = "rgb(0 0 0 / 50%)";
+    ctx.strokeStyle = line_color;
     ctx.lineWidth = 1; // Adjust the line width as needed
 
     ctx.stroke();
 
 }
 
-tree_elements = [{}]
-
 function draw() {
     draw_canvas();
-    tree_elements.forEach((tree_el) => {
-        draw_tree_element(tree_el)
+    nodes.forEach((node) => {
+        draw_tree_element(node)
+    })
+    branches.forEach((branch)=>{
+        draw_branch(branch)
     })
 }
 
@@ -149,8 +213,8 @@ function draw_canvas() {
     ctx.restore();
 }
 
-function draw_tree_element(element) {
-    draw_rect()
+function draw_tree_element(node) {
+    draw_rect(node.x, node.y, node.width, node.height, node.line_color, node.background_color)
 }
 
 draw();
