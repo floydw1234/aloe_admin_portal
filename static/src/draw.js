@@ -3,8 +3,8 @@ const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d');
 
 // Set the size of the canvas
-const canvasWidth = 5000;
-const canvasHeight = 5000;
+const canvasWidth = 1200;
+const canvasHeight = 650;
 canvas.width = canvasWidth;
 canvas.height = canvasHeight;
 
@@ -14,20 +14,54 @@ let isDragging = false;
 let lastMouseX = 0;
 let lastMouseY = 0;
 let scale = 1;
-let offsetX = 0;
-let offsetY = 0;
+let offsetX = -canvasWidth / 2 + 450;
+let offsetY = 20;
 
-function draw_rect(){
+var node = {
+    x:"",
+    y:"",
+    height:"",
+    width:"",
+    text:"",
+    type:"",
+    icon:"",
+    click:"",
+}
+
+
+function draw_initializer_node(x,y){
+
+}
+
+
+function draw_new_node_options(current_node){
+    
+}
+
+function draw_new_node_options(options, x,y){
+    
+}
+
+function draw_empty_branches(prev_node){
+
+}
+
+function draw_filled_node(text, icon){
+
+}
+
+
+function draw_rect() {
     // Set the radius for the rounded edges
     const cornerRadius = 20 * scale;
 
     // Set the dimensions of the rectangle
-    const width = 400 * scale;
+    const width = 300 * scale;
     const height = 200 * scale;
 
     // Calculate the coordinates for the rounded corners
-    const xTopLeft = 10 + offsetX;
-    const yTopLeft = 10 + offsetY;
+    const xTopLeft = canvasWidth / 2 + offsetX;
+    const yTopLeft = 2 + offsetY;
     const xTopRight = xTopLeft + width;
     const yTopRight = yTopLeft;
     const xBottomRight = xTopRight;
@@ -76,13 +110,13 @@ tree_elements = [{}]
 
 function draw() {
     draw_canvas();
-    tree_elements.forEach((tree_el)=>{
+    tree_elements.forEach((tree_el) => {
         draw_tree_element(tree_el)
     })
 }
 
 
-function draw_canvas(){
+function draw_canvas() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     ctx.save();
 
@@ -100,22 +134,22 @@ function draw_canvas(){
     ctx.strokeStyle = '#ddd';
     ctx.lineWidth = 1;
     for (let x = startX; x < endX; x += gridSize) {
-    ctx.beginPath();
-    ctx.moveTo(x, startY);
-    ctx.lineTo(x, endY);
-    ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, startY);
+        ctx.lineTo(x, endY);
+        ctx.stroke();
     }
     for (let y = startY; y < endY; y += gridSize) {
-    ctx.beginPath();
-    ctx.moveTo(startX, y);
-    ctx.lineTo(endX, y);
-    ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(startX, y);
+        ctx.lineTo(endX, y);
+        ctx.stroke();
     }
 
     ctx.restore();
 }
 
-function draw_tree_element(element){
+function draw_tree_element(element) {
     draw_rect()
 }
 
@@ -153,11 +187,11 @@ function handleMouseUp(event) {
 
 function handleMouseMove(event) {
     if (isDragging) {
-    const deltaX = event.clientX - lastMouseX;
-    const deltaY = event.clientY - lastMouseY;
-    lastMouseX = event.clientX;
-    lastMouseY = event.clientY;
-    updateOffset(deltaX, deltaY);
+        const deltaX = event.clientX - lastMouseX;
+        const deltaY = event.clientY - lastMouseY;
+        lastMouseX = event.clientX;
+        lastMouseY = event.clientY;
+        updateOffset(deltaX, deltaY);
     }
 }
 
@@ -172,12 +206,12 @@ function handleTouchStart(event) {
 function handleTouchMove(event) {
     event.preventDefault();
     if (isDragging) {
-    const touch = event.touches[0];
-    const deltaX = touch.clientX - lastMouseX;
-    const deltaY = touch.clientY - lastMouseY;
-    lastMouseX = touch.clientX;
-    lastMouseY = touch.clientY;
-    updateOffset(deltaX, deltaY);
+        const touch = event.touches[0];
+        const deltaX = touch.clientX - lastMouseX;
+        const deltaY = touch.clientY - lastMouseY;
+        lastMouseX = touch.clientX;
+        lastMouseY = touch.clientY;
+        updateOffset(deltaX, deltaY);
     }
 }
 
