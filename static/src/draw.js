@@ -18,36 +18,10 @@ let offsetX = -canvasWidth / 2 + 450;
 let offsetY = 20;
 
 
-
 var nodes = [{
     nodeId:"",
     x: 600,
     y: 2,
-    height:200,
-    width:300,
-    line_color:"rgb(0 0 0 / 50%)",
-    background_color:"white",
-    text:"",
-    type:"",
-    icon:"",
-    click:"",
-},{
-    nodeId:"",
-    x: 200,
-    y: 2,
-    height:200,
-    width:300,
-    line_color:"rgb(0 0 0 / 50%)",
-    background_color:"white",
-    text:"",
-    type:"",
-    icon:"",
-    click:"",
-},
-{
-    nodeId:"",
-    x: 200,
-    y: 400,
     height:200,
     width:300,
     line_color:"rgb(0 0 0 / 50%)",
@@ -66,8 +40,6 @@ var branches = [{
     end_y:500,
     color:"rgb(0 0 0 / 50%)",
 }]
-
-
 
 function draw_initializer_node(x,y){
 
@@ -175,7 +147,7 @@ function draw() {
         draw_tree_element(node)
     })
     branches.forEach((branch)=>{
-        draw_branch(branch)
+        //draw_branch(branch)
     })
 }
 
