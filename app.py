@@ -20,7 +20,7 @@ if ENV_FILE:
 conn_string = f"mongodb+srv://{env.get('MONGO_USERNAME')}:{env.get('MONGO_PASSWORD')}@test.jzgvx1f.mongodb.net/?retryWrites=true&w=majority"
 client = MongoClient(conn_string, server_api=ServerApi('1'))
 
-db = client.get_database("Aloe_mvp")
+db = client.get_database("aloe_beta")
 leads_coll = db.get_collection("leads")
 library_coll = db.get_collection("library")
 user_coll = db.get_collection("Users")
