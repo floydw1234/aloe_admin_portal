@@ -23,7 +23,7 @@ client = MongoClient(conn_string, server_api=ServerApi('1'))
 db = client.get_database("aloe_beta")
 leads_coll = db.get_collection("leads")
 library_coll = db.get_collection("library")
-user_coll = db.get_collection("Users")
+user_coll = db.get_collection("users")
 demo_coll = db.get_collection("demos")
 question_coll = db.get_collection("demo_questions")
 client_col = db.get_collection("clients")
@@ -46,8 +46,8 @@ oauth.register(
 
 @app.route("/")
 def main_page():
-    
     email = (session.get("user", {}).get("userinfo", {}).get("email"))
+    print(email)
     if email:
         user = user_coll.find_one({"email":email})
         if user:
@@ -150,11 +150,12 @@ def extract_info(client_id):
     resp = requests.get("http://localhost:10000/extract_form_data/"+str(client_id))
     return jsonify(resp.json())
 
+# 👆 We're continuing from the steps above. Append this to your server.py file.
+
 @app.route("/login")
 def login():
-    redirect_uri = url_for("callback", _external=True) if app.debug else f"https://{ env.get('WEBSITE_URL') }/callback"
     return oauth.auth0.authorize_redirect(
-        redirect_uri=redirect_uri
+        redirect_uri=url_for("callback", _external=True)
     )
 
 @app.route("/callback", methods=["GET", "POST"])

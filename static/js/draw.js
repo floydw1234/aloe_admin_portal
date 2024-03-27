@@ -19,11 +19,11 @@ let offsetY = 20;
 
 
 var nodes = [{
-    nodeId:"",
+    nodeId:"1",
     x: 600,
     y: 2,
-    height:200,
-    width:300,
+    height:100,
+    width:150,
     line_color:"rgb(0 0 0 / 50%)",
     background_color:"white",
     text:"",
@@ -33,11 +33,11 @@ var nodes = [{
 }]
 
 var branches = [{
-    parentNodeId:"",
-    start_x: 600,
-    start_y: 300,
-    end_x:400,
-    end_y:500,
+    parentNodeId:"1",
+    start_x: 675,
+    start_y: 102,
+    end_x:300,
+    end_y:200,
     color:"rgb(0 0 0 / 50%)",
 }]
 
@@ -75,8 +75,8 @@ function draw_branch({start_x, start_y, end_x, end_y, color}){
     end_y = (end_y + offsetY) * scale
     let height = end_y-start_y
     ctx.moveTo(start_x, start_y);
-    // ctx.lineTo(start_x, start_y);
-    // ctx.lineTo(end_x, start_y );
+    ctx.lineTo(start_x, start_y+50);
+    ctx.lineTo(end_x, start_y+50 );
     ctx.lineTo(end_x, end_y);
 
     ctx.strokeStyle = color;
@@ -147,7 +147,7 @@ function draw() {
         draw_tree_element(node)
     })
     branches.forEach((branch)=>{
-        //draw_branch(branch)
+        draw_branch(branch)
     })
 }
 
@@ -191,24 +191,10 @@ function draw_tree_element(node) {
 
 draw();
 
-
-function updateScale(delta) {
-    const zoomSpeed = 0.1;
-    scale += delta * zoomSpeed;
-    if (scale < 0.1) scale = 0.1;
-    if (scale > 5) scale = 5;
-    draw();
-}
-
 function updateOffset(x, y) {
     offsetX += x;
     offsetY += y;
     draw();
-}
-
-function handleMouseWheel(event) {
-    const delta = Math.sign(event.deltaY);
-    updateScale(delta);
 }
 
 function handleMouseDown(event) {
@@ -257,7 +243,6 @@ function handleTouchEnd(event) {
 }
 
 // Add event listeners
-container.addEventListener('wheel', handleMouseWheel);
 container.addEventListener('mousedown', handleMouseDown);
 window.addEventListener('mouseup', handleMouseUp);
 container.addEventListener('mousemove', handleMouseMove);
