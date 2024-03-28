@@ -17,20 +17,26 @@ let scale = 1;
 let offsetX = -canvasWidth / 2 + 450;
 let offsetY = 20;
 
+var blackColor ="rgb(0 0 0 / 75%)"
 
-var nodes = [{
-    nodeId:"1",
-    x: 600,
-    y: 2,
-    height:100,
-    width:150,
-    line_color:"rgb(0 0 0 / 50%)",
-    background_color:"white",
-    text:"",
-    type:"",
-    icon:"",
-    click:"",
-}]
+let starting_x = 600
+let starting_y = 2
+
+var nodes = []
+
+// var nodes = [{
+//     nodeId:"1",
+//     x: 600,
+//     y: 2,
+//     height:100,
+//     width:150,
+//     line_color:"rgb(0 0 0 / 50%)",
+//     background_color:"white",
+//     text:"",
+//     type:"",
+//     icon:"",
+//     click:"",
+// }]
 
 var branches = [{
     parentNodeId:"1",
@@ -41,11 +47,30 @@ var branches = [{
     color:"rgb(0 0 0 / 50%)",
 }]
 
-function draw_initializer_node(x,y){
+function draw_initial_ui(){  
+    draw_plus(starting_x + 75, starting_y, 60)
 
+    
 }
 
-function draw_plus(node){
+function draw_plus(x,y, plus_size){
+    start_x = (x + offsetX)
+    start_y = (y + offsetY)
+    ctx.beginPath();
+    ctx.moveTo(start_x, start_y);
+    ctx.lineTo(start_x, start_y+plus_size);
+    ctx.strokeStyle = blackColor;
+    ctx.lineWidth = 10; // Adjust the line width as needed
+    ctx.lineCap = "round"
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(start_x+plus_size/2, start_y+plus_size/2);
+    ctx.lineTo(start_x-plus_size/2, start_y+plus_size/2);
+    ctx.strokeStyle = blackColor;
+    ctx.lineWidth = 10; // Adjust the line width as needed
+    ctx.lineCap = "round"
+    ctx.stroke();
 
 }
 
@@ -73,7 +98,6 @@ function draw_branch({start_x, start_y, end_x, end_y, color}){
     start_y = (start_y + offsetY) * scale
     end_x = (end_x + offsetX) * scale
     end_y = (end_y + offsetY) * scale
-    let height = end_y-start_y
     ctx.moveTo(start_x, start_y);
     ctx.lineTo(start_x, start_y+50);
     ctx.lineTo(end_x, start_y+50 );
@@ -141,13 +165,18 @@ function draw_rect(start_x,start_y,start_width,start_height,line_color, backgrou
 
 }
 
+draw();
+
 function draw() {
     draw_canvas();
+    if(!nodes || nodes.length == 0){
+        draw_initial_ui()
+    }
     nodes.forEach((node) => {
-        draw_tree_element(node)
+        //draw_tree_element(node)
     })
     branches.forEach((branch)=>{
-        draw_branch(branch)
+        //draw_branch(branch)
     })
 }
 
@@ -188,8 +217,6 @@ function draw_canvas() {
 function draw_tree_element(node) {
     draw_rect(node.x, node.y, node.width, node.height, node.line_color, node.background_color)
 }
-
-draw();
 
 function updateOffset(x, y) {
     offsetX += x;
