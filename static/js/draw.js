@@ -18,6 +18,7 @@ let offsetX = -canvasWidth / 2 + 450;
 let offsetY = 20;
 
 var blackColor ="rgb(0 0 0 / 75%)"
+var greyColor = "rgb(0 0 0 / 25%)"
 
 let starting_x = 600
 let starting_y = 2
@@ -38,6 +39,35 @@ var nodes = []
 //     click:"",
 // }]
 
+
+var nodeOptions = [
+    {
+        "text":"Video",
+        "imgSrc":"",
+        "id":"videoOption"
+    },{
+        "text":"Multiple choice",
+        "imgSrc":"",
+        "id":"videoOption"
+    }, {
+        "text":"Statement",
+        "imgSrc":"",
+        "id":"videoOption"
+    }, {
+        "text":"Image",
+        "imgSrc":"",
+        "id":"videoOption"
+    }, {
+        "text":"Lead form",
+        "imgSrc":"",
+        "id":"videoOption"
+    }, {
+        "text":"PDF",
+        "imgSrc":"",
+        "id":"videoOption"
+    }
+]
+
 var branches = [{
     parentNodeId:"1",
     start_x: 675,
@@ -48,9 +78,14 @@ var branches = [{
 }]
 
 function draw_initial_ui(){  
-    draw_plus(starting_x + 75, starting_y, 60)
 
-    
+    draw_plus(starting_x + 150, starting_y, 60)
+
+    nodeOptions.forEach((option, index)=>{
+        draw_node_option(starting_x + 150, starting_y, option, nodeOptions.length,index)
+    })
+
+
 }
 
 function draw_plus(x,y, plus_size){
@@ -71,6 +106,19 @@ function draw_plus(x,y, plus_size){
     ctx.lineWidth = 10; // Adjust the line width as needed
     ctx.lineCap = "round"
     ctx.stroke();
+
+}
+
+
+function draw_node_option(plus_x, plus_y, option, options_len, index){
+    options_width = (options_len * 175)
+    start_x = (plus_x - (options_width/2) ) + index*175 + 12.5
+    start_y = (plus_y + 100)
+
+    draw_rect(start_x, start_y, 150, 100, blackColor, greyColor)
+
+    ctx.font = "24px Poppins sans-serif;";
+    ctx.strokeText(option.text, start_x + 50 + offsetX, starting_y + 170 + offsetY);
 
 }
 
@@ -171,13 +219,15 @@ function draw() {
     draw_canvas();
     if(!nodes || nodes.length == 0){
         draw_initial_ui()
+    }else{
+        nodes.forEach((node) => {
+            draw_tree_element(node)
+        })
+        branches.forEach((branch)=>{
+            draw_branch(branch)
+        })
     }
-    nodes.forEach((node) => {
-        //draw_tree_element(node)
-    })
-    branches.forEach((branch)=>{
-        //draw_branch(branch)
-    })
+    
 }
 
 
