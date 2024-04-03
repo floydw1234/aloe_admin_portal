@@ -23,21 +23,21 @@ var greyColor = "rgb(0 0 0 / 25%)"
 let starting_x = 600
 let starting_y = 2
 
-var nodes = []
+// var nodes = []
 
-// var nodes = [{
-//     nodeId:"1",
-//     x: 600,
-//     y: 2,
-//     height:100,
-//     width:150,
-//     line_color:"rgb(0 0 0 / 50%)",
-//     background_color:"white",
-//     text:"",
-//     type:"",
-//     icon:"",
-//     click:"",
-// }]
+var nodes = [{
+    nodeId:"1",
+    x: 600,
+    y: 2,
+    height:100,
+    width:150,
+    line_color:"rgb(0 0 0 / 50%)",
+    background_color:"white",
+    text:"",
+    type:"",
+    icon:"",
+    click:"",
+}]
 
 
 var nodeOptions = [
