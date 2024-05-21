@@ -4,7 +4,7 @@ const ctx = canvas.getContext('2d');
 
 // Set the size of the canvas
 const canvasWidth = 1200;
-const canvasHeight = 650;
+const canvasHeight = 700;
 canvas.width = canvasWidth;
 canvas.height = canvasHeight;
 
@@ -23,21 +23,21 @@ var greyColor = "rgb(0 0 0 / 25%)"
 let starting_x = 600
 let starting_y = 2
 
-// var nodes = []
+var nodes = []
 
-var nodes = [{
-    nodeId:"1",
-    x: 600,
-    y: 2,
-    height:100,
-    width:150,
-    line_color:"rgb(0 0 0 / 50%)",
-    background_color:"white",
-    text:"",
-    type:"",
-    icon:"",
-    click:"",
-}]
+// var nodes = [{
+//     nodeId:"1",
+//     x: 600,
+//     y: 2,
+//     height:100,
+//     width:150,
+//     line_color:"rgb(0 0 0 / 50%)",
+//     background_color:"white",
+//     text:"",
+//     type:"",
+//     icon:"",
+//     click:"",
+// }]
 
 
 var nodeOptions = [
@@ -79,14 +79,15 @@ var branches = [{
 
 function draw_initial_ui(){  
 
-    draw_plus(starting_x + 150, starting_y, 60)
+    draw_plus(starting_x + 150, starting_y, 50)
 
     nodeOptions.forEach((option, index)=>{
         draw_node_option(starting_x + 150, starting_y, option, nodeOptions.length,index)
     })
 
-
 }
+
+
 
 function draw_plus(x,y, plus_size){
     start_x = (x + offsetX)
@@ -111,16 +112,32 @@ function draw_plus(x,y, plus_size){
 
 
 function draw_node_option(plus_x, plus_y, option, options_len, index){
-    options_width = (options_len * 175)
-    start_x = (plus_x - (options_width/2) ) + index*175 + 12.5
-    start_y = (plus_y + 100)
+    let fontSize = 12
+    // Calculate options width and start positions
+    let options_width = (options_len * 120);
+    let start_x = (plus_x - (options_width / 2)) + index * 120 + 12.5;
+    let start_y = (plus_y + 100);
 
-    draw_rect(start_x, start_y, 150, 100, blackColor, greyColor)
+    // Draw the rectangle
+    draw_rect(start_x, start_y, 100, 65, blackColor, greyColor);
 
-    ctx.font = "24px Poppins sans-serif;";
-    ctx.strokeText(option.text, start_x + 50 + offsetX, starting_y + 170 + offsetY);
+    // Set font style for the context
+    ctx.font = fontSize + "px 'Poppins', sans-serif";
 
+    // Measure the text width
+    let textWidth = ctx.measureText(option.text).width;
+
+    // Calculate the horizontal position to center the text
+    let textX = start_x + (100 - textWidth) / 2  + offsetX;
+
+    // Calculate the vertical position to center the text
+    let textY = start_y + 65 / 2 + fontSize / 2  + offsetY;  
+
+    ctx.fillStyle = "black";
+    // Draw the text
+    ctx.fillText(option.text, textX, textY);
 }
+
 
 
 function draw_new_node_options(current_node){
@@ -212,6 +229,7 @@ function draw_rect(start_x,start_y,start_width,start_height,line_color, backgrou
     ctx.stroke();
 
 }
+
 
 draw();
 
