@@ -213,10 +213,10 @@ function draw_rect(start_x,start_y,start_width,start_height,line_color, backgrou
         let textWidth = ctx.measureText(text).width;
 
         // Calculate the horizontal position to center the text
-        let textX = start_x + (100 - textWidth) / 2  + offsetX;
+        let textX = start_x + (rectWidth - textWidth) / 2  + offsetX;
 
         // Calculate the vertical position to center the text
-        let textY = start_y + 65 / 2 + fontSize / 2  + offsetY;  
+        let textY = start_y + (rectHeight-15) / 2 + fontSize / 2  + offsetY;  
 
         ctx.fillStyle = "black";
         // Draw the text
