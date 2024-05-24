@@ -20,11 +20,12 @@ let offsetY = 20;
 var blackColor ="rgb(0 0 0 / 75%)"
 var greyColor = "rgb(0 0 0 / 25%)"
 
-let starting_x = 750
+let starting_x = 200
 let starting_y = 2
 
 let rectWidth = 150
 let rectHeight = 100
+let spacing = 50
 let line_color = "rgb(0 0 0 / 50%)"
 let background_color = "white"
 
@@ -34,69 +35,203 @@ let optionRectHeight = 65
 // var nodes = []
 
 var nodes = [{
-    id:"1",
-    text:"a",
-    type:"",
-    icon:"",
-    click:"",
-    children:["2", "3", "4", "5"]
-},{
-    id:"2",
-    text:"b",
-    type:"",
-    icon:"",
-    click:"",
-    children:[]
-},{
-    id:"3",
-    text:"c",
-    type:"",
-    icon:"",
-    click:"",
-    children:[]
-},{
-    id:"4",
-    text:"d",
-    type:"",
-    icon:"",
-    click:"",
-    children:["6","7"]
-},{
-    id:"5",
-    text:"e",
-    type:"",
-    icon:"",
-    click:"",
-    children:["8","9"]
-},{
-    id:"6",
-    text:"a",
-    type:"",
-    icon:"",
-    click:"",
-    children:[]
-},{
-    id:"7",
-    text:"b",
-    type:"",
-    icon:"",
-    click:"",
-    children:[]
-},{
-    id:"8",
-    text:"x",
-    type:"",
-    icon:"",
-    click:"",
-    children:[]
-},{
-    id:"9",
-    text:"y",
-    type:"",
-    icon:"",
-    click:"",
-    children:[]
-}]
+    id: "1",
+    text: "root",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["2", "3", "4", "5", "6"]
+}, {
+    id: "2",
+    text: "level1-1",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["7", "8"]
+}, {
+    id: "3",
+    text: "level1-2",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["9"]
+}, {
+    id: "4",
+    text: "level1-3",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["10", "11"]
+}, {
+    id: "5",
+    text: "level1-4",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["12", "13", "14"]
+}, {
+    id: "6",
+    text: "level1-5",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["15"]
+}, {
+    id: "7",
+    text: "level2-1",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["16", "17"]
+}, {
+    id: "8",
+    text: "level2-2",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["18"]
+}, {
+    id: "9",
+    text: "level2-3",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["19", "20"]
+}, {
+    id: "10",
+    text: "level2-4",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["21"]
+}, {
+    id: "11",
+    text: "level2-5",
+    type: "",
+    icon: "",
+    click: "",
+    children: []
+}, {
+    id: "12",
+    text: "level2-6",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["22", "23"]
+}, {
+    id: "13",
+    text: "level2-7",
+    type: "",
+    icon: "",
+    click: "",
+    children: []
+}, {
+    id: "14",
+    text: "level2-8",
+    type: "",
+    icon: "",
+    click: "",
+    children: []
+}, {
+    id: "15",
+    text: "level2-9",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["24"]
+}, {
+    id: "16",
+    text: "level3-1",
+    type: "",
+    icon: "",
+    click: "",
+    children: []
+}, {
+    id: "17",
+    text: "level3-2",
+    type: "",
+    icon: "",
+    click: "",
+    children: []
+}, {
+    id: "18",
+    text: "level3-3",
+    type: "",
+    icon: "",
+    click: "",
+    children: []
+}, {
+    id: "19",
+    text: "level3-4",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["25", "26"]
+}, {
+    id: "20",
+    text: "level3-5",
+    type: "",
+    icon: "",
+    click: "",
+    children: []
+}, {
+    id: "21",
+    text: "level3-6",
+    type: "",
+    icon: "",
+    click: "",
+    children: []
+}, {
+    id: "22",
+    text: "level3-7",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["27"]
+}, {
+    id: "23",
+    text: "level3-8",
+    type: "",
+    icon: "",
+    click: "",
+    children: []
+}, {
+    id: "24",
+    text: "level3-9",
+    type: "",
+    icon: "",
+    click: "",
+    children: ["28"]
+}, {
+    id: "25",
+    text: "level4-1",
+    type: "",
+    icon: "",
+    click: "",
+    children: []
+}, {
+    id: "26",
+    text: "level4-2",
+    type: "",
+    icon: "",
+    click: "",
+    children: []
+}, {
+    id: "27",
+    text: "level4-3",
+    type: "",
+    icon: "",
+    click: "",
+    children: []
+}, {
+    id: "28",
+    text: "level4-4",
+    type: "",
+    icon: "",
+    click: "",
+    children: []
+}];
+
 
 
 var nodeOptions = [
@@ -345,49 +480,56 @@ function draw_tree_elements(node, plus_x, plus_y) {
     })
 }
 
-function getNodeFromId(id){
-    for(let i = 0; i < nodes.length; i++){
-        if(nodes[i].id === id){
-            return nodes[i]
+
+function getNodeFromId(id) {
+    return nodes.find(n => n.id === id);
+}
+
+function get_coordinates(node, parent, plus_x, plus_y, current_index, nodes) {
+    const leftNeighbor = current_index > 0 ? getNodeFromId(parent.children[current_index - 1], nodes) : null;
+    const rightNeighbor = current_index < parent.children.length - 1 ? getNodeFromId(parent.children[current_index + 1], nodes) : null;
+
+    const leftChildOffset = leftNeighbor ? getNodeRecursiveWidth(leftNeighbor) : 0;
+    const rightChildOffset = rightNeighbor ? getNodeRecursiveWidth(rightNeighbor) : 0;
+
+    const selfWidthOffset = getNodeRecursiveWidth(node) / 2;
+
+    const optionsLength = parent.children.length;
+    const options_width = parent.children.reduce((acc, childId) => {
+        const childNode = getNodeFromId(childId, nodes);
+        return acc + getNodeRecursiveWidth(childNode) + spacing;
+    }, -spacing); // subtract last spacing
+
+    let accumulatedWidth = 0;
+    for (let i = 0; i < current_index; i++) {
+        const childNode = getNodeFromId(parent.children[i]);
+        accumulatedWidth += getNodeRecursiveWidth(childNode) + spacing;
+    }
+
+    const start_x = plus_x - options_width / 2 + accumulatedWidth + selfWidthOffset - rectWidth / 2;
+    const start_y = plus_y + rectHeight + 100;
+
+    return [start_x, start_y];
+}
+
+function getNodeRecursiveWidth(node) {
+    if (!node || !node.children || node.children.length === 0) {
+        return rectWidth;
+    }
+
+    let totalChildrenWidth = 0;
+    node.children.forEach((childId, index) => {
+        const childNode = nodes.find(n => n.id === childId);
+        if (childNode) {
+            const childWidth = getNodeRecursiveWidth(childNode);
+            totalChildrenWidth += childWidth;
+            if (index < node.children.length - 1) {
+                totalChildrenWidth += spacing;
+            }
         }
-    }
-    return null
-}
+    });
 
-function get_coordinates(node, parent, plus_x, plus_y, current_index){
-
-    let leftNeighbor = null
-    let rightNeighbor = null
-
-    if (current_index - 1 > 0) {
-        leftNeighbor = getNodeFromId(parent.children[current_index-1])
-    }
-    if (current_index + 1 < parent.children.length) {
-        rightNeighbor = getNodeFromId(parent.children[current_index+1])
-    }
-
-    let leftChildOffset = getNodeRecursiveWidth(leftNeighbor)/2
-    let rightChildOffset = getNodeRecursiveWidth(rightNeighbor)/2
-
-    let optionsLength = parent.children.length
-    let index = parent.children.indexOf(node.id)
-    let options_width = (optionsLength * (rectWidth+50));
-    let start_x = (plus_x - (options_width / 2)) + index * (rectWidth+50) + 100 + leftChildOffset;
-    let start_y = (plus_y + rectHeight+100);
-    return [start_x, start_y]
-}
-
-function getNodeRecursiveWidth(node){
-    let maxWidth = 0
-    if(node && node.children){
-        maxWidth = (rectWidth+50) * node.children.length
-        node.children.forEach((child)=>{
-            maxWidth = Math.max(getNodeRecursiveWidth(child), maxWidth)
-        })
-       
-    }
-    return maxWidth
-
+    return Math.max(rectWidth, totalChildrenWidth);
 }
 
 function updateOffset(x, y) {
