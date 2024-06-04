@@ -32,13 +32,25 @@ let background_color = "white"
 let optionRectWidth = 100
 let optionRectHeight = 65
 
+let drawn_nodes = []
+
 // var nodes = []
-const nodes = [
-    { id: "1", text: "root", children: ["2", "3"] },
-    { id: "2", text: "child1", children: ["4"] },
-    { id: "3", text: "child2", children: [] },
-    { id: "4", text: "child1.1", children: [] }
-];
+// const nodes = [
+//     { id: "1", text: "root", children: ["2", "3", "4"] },
+//     { id: "2", text: "child1", children: ["5", "6"] },
+//     { id: "3", text: "child2", children: ["7"] },
+//     { id: "4", text: "child3", children: ["8", "9"] },
+//     { id: "5", text: "child1.1", children: ["10"] },
+//     { id: "6", text: "child1.2", children: [] },
+//     { id: "7", text: "child2.1", children: ["11", "12"] },
+//     { id: "8", text: "child3.1", children: [] },
+//     { id: "9", text: "child3.2", children: ["13"] },
+//     { id: "10", text: "child1.1.1", children: [] },
+//     { id: "11", text: "child2.1.1", children: ["14"] },
+//     { id: "12", text: "child2.1.2", children: [] },
+//     { id: "13", text: "child3.2.1", children: [] },
+//     { id: "14", text: "child2.1.1.1", children: [] }
+// ];
 
 
 
@@ -231,6 +243,7 @@ function draw_rect(start_x,start_y,start_width,start_height,line_color, backgrou
 draw();
 
 function draw() {
+    drawn_nodes = []
     draw_canvas();
     if(!nodes || nodes.length == 0){
         draw_initial_ui()
@@ -275,22 +288,27 @@ function draw_canvas() {
 }
 
 function draw_tree_elements(node, plus_x, plus_y) {
-    draw_rect(plus_x, plus_y, rectWidth, rectWidth, line_color, background_color, node.text, 16)
+    drawn_nodes.push(String(node.id))
+    draw_rect(plus_x, plus_y, rectWidth, rectWidth, line_color, background_color, node.type, 16)
     node.children.forEach((id, index)=>{
         let child_node = getNodeFromId(id)
-        if(child_node){
+        if (!child_node) return;
+
+        if(!drawn_nodes.includes(String(id))){
             let coords = get_coordinates(child_node, node, plus_x, plus_y, index)
             draw_tree_elements(child_node, coords[0], coords[1])
             child_node = getNodeFromId(id)
-            coords = get_coordinates(child_node, node, plus_x, plus_y, index)
-            draw_branch(plus_x+rectHeight/2+25, plus_y+rectHeight+50, coords[0]+rectWidth/2, coords[1])
+            let branchcoords = get_coordinates(child_node, node, plus_x, plus_y, index)
+            draw_branch(plus_x+rectHeight/2+25, plus_y+rectHeight+50, branchcoords[0]+rectWidth/2, branchcoords[1])
+        }else{
+            
         }
     })
 }
 
 
 function getNodeFromId(id) {
-    return nodes.find(n => n.id === id);
+    return nodes.find(n => String(n.id) === String(id));
 }
 
 function get_coordinates(node, parent, plus_x, plus_y, current_index, nodes) {

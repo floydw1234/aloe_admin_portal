@@ -25,6 +25,7 @@ leads_coll = db.get_collection("leads")
 library_coll = db.get_collection("library")
 user_coll = db.get_collection("users")
 demo_coll = db.get_collection("demos")
+demo_flow_coll = db.get_collection("demo_flows")
 question_coll = db.get_collection("demo_questions")
 client_col = db.get_collection("clients")
 app = Flask(__name__)
@@ -100,10 +101,11 @@ def demo_edit_view(demo_id):
     if email:
         user = user_coll.find_one({"email":email})
         demo = demo_coll.find_one({"_id": str(demo_id)})
+        flow = demo_flow_coll.find_one({"_id":demo.get("demo_tree_ids")[0]})
         if str(demo.get("client_id")) != str(user.get("client_id")):
             return jsonify({"status":"error 403"})
         else:
-            return render_template("demo_edit.html", demo=demo,client_id= user.get("client_id"),client_name=client_col.find_one({"_id":user.get("client_id") }).get("name"))
+            return render_template("demo_edit.html", flow=flow, demo=demo,client_id= user.get("client_id"),client_name=client_col.find_one({"_id":user.get("client_id") }).get("name"))
     else:
         return jsonify({"status":"error 403"})
 
