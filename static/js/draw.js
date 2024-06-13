@@ -33,6 +33,10 @@ let optionRectWidth = 100
 let optionRectHeight = 65
 
 let drawn_nodes = []
+let existing_cords_map = {}
+let clickable_nodes_map = {}
+let clickable_branches_map = {}
+
 
 // var nodes = []
 // const nodes = [
@@ -85,11 +89,32 @@ var nodeOptions = [
 
 function draw_initial_ui(){  
 
-    draw_plus(starting_x, starting_y, 50)
+    // draw_plus(starting_x, starting_y, 50)
 
-    nodeOptions.forEach((option, index)=>{
-        draw_node_option(starting_x, starting_y, option, nodeOptions.length,index)
-    })
+    // nodeOptions.forEach((option, index)=>{
+    //     draw_node_option(starting_x, starting_y, option, nodeOptions.length,index)
+    // })
+
+    nodes = [
+        {
+            "id":1,
+            "type":"Intro",
+            "label":"placeHolder Intro",
+            "script":[],
+            "options":["End"],
+            "children":[2],
+        },
+        {
+            "id":2,
+            "type":"End",
+            "label":"placeHolder Close",
+            "script":[],
+            "options":[],
+            "children":[],
+        }
+    ]
+
+    draw()
 
 }
 
@@ -124,7 +149,7 @@ function draw_node_option(plus_x, plus_y, option, options_len, index){
     let start_y = (plus_y + 100);
 
     // Draw the rectangle
-    draw_rect(start_x, start_y, optionRectWidth, optionRectHeight, blackColor, greyColor, option.text, 12);
+    draw_rect(start_x, start_y, optionRectWidth, optionRectHeight, blackColor, greyColor, option.text, "", 12);
 
 }
 
@@ -146,26 +171,66 @@ function draw_filled_node(text, icon){
     
 }
 
-
-function draw_branch(start_x, start_y, end_x, end_y, color){
+function draw_branch(start_x, start_y, end_x, end_y, color, onClick){
     ctx.beginPath();
-    start_x = (start_x + offsetX) * scale
-    start_y = (start_y + offsetY) * scale
-    end_x = (end_x + offsetX) * scale
-    end_y = (end_y + offsetY) * scale
+    start_x = (start_x + offsetX) * scale;
+    start_y = (start_y + offsetY) * scale;
+    end_x = (end_x + offsetX) * scale;
+    end_y = (end_y + offsetY) * scale;
+    
+    // Calculate the middle point of the line
+    const mid_x = (start_x + end_x) / 2;
+    const mid_y = (start_y + end_y) / 2;
+
+    // Draw the branch
     ctx.moveTo(start_x, start_y);
-    ctx.lineTo(start_x, start_y+25);
-    ctx.lineTo(end_x, start_y+25);
+    ctx.lineTo(start_x, start_y + 25);
+    ctx.lineTo(end_x, start_y + 25);
     ctx.lineTo(end_x, end_y);
 
     ctx.strokeStyle = color;
     ctx.lineWidth = 2; // Adjust the line width as needed
     ctx.stroke();
+    
+    // Draw the circle at the middle of the line
+    const circleRadius = 5; // Adjust the circle radius as needed
+    ctx.beginPath();
+    ctx.arc(mid_x, mid_y, circleRadius, 0, 2 * Math.PI);
+    ctx.fillStyle = color;
+    ctx.fill();
 
+    // Draw the plus sign inside the circle
+    const plusSize = 4; // Adjust the size of the plus sign as needed
+    ctx.beginPath();
+    ctx.moveTo(mid_x - plusSize, mid_y);
+    ctx.lineTo(mid_x + plusSize, mid_y);
+    ctx.moveTo(mid_x, mid_y - plusSize);
+    ctx.lineTo(mid_x, mid_y + plusSize);
+
+    ctx.strokeStyle = "white"; // Adjust the color of the plus sign as needed
+    ctx.lineWidth = 2; // Adjust the line width of the plus sign as needed
+    ctx.stroke();
+
+    // Define the clickable area around the plus sign
+    const clickableArea = {
+        x: mid_x - circleRadius,
+        y: mid_y - circleRadius,
+        width: circleRadius * 2,
+        height: circleRadius * 2
+    };
+
+    clickable_branches_map[Object.entries(clickable_branches_map).length] = clickableArea;
+    
+}
+
+// Example usage
+function handlePlusClick(nodes) {
+    console.log(nodes)
 }
 
 
-function draw_rect(start_x,start_y,start_width,start_height,line_color, background_color, text="", fontSize="") {
+
+function draw_rect(start_x,start_y,start_width,start_height,line_color, background_color, node, text="", subtext="",fontSize="") {
     // Set the radius for the rounded edges
     const cornerRadius = 20 * scale;
 
@@ -234,11 +299,42 @@ function draw_rect(start_x,start_y,start_width,start_height,line_color, backgrou
         // Draw the text
         ctx.fillText(text, textX, textY);
     }
+    if(subtext){
+        ctx.font = fontSize-2 + "px 'Poppins', sans-serif";
+
+        // Measure the text width
+        let textWidth = ctx.measureText(subtext).width;
+
+        // Calculate the horizontal position to center the text
+        let textX = start_x + (rectWidth - textWidth) / 2  + offsetX;
+
+        // Calculate the vertical position to center the text
+        let textY = start_y + (rectHeight+50) / 2 + fontSize / 2  + offsetY;  
+
+        ctx.fillStyle = "black";
+        // Draw the text
+        ctx.fillText(subtext, textX, textY);
+    }
+
+    if(node){
+        const clickableArea = {
+            x: xTopLeft,
+            y: yTopLeft,
+            width: width,
+            height: height
+        };
+
+        clickable_nodes_map[node.id] = clickableArea
+    }
 
     
-
 }
 
+
+
+function rectClicked(node){
+    console.log(node)
+}
 
 draw();
 
@@ -289,19 +385,21 @@ function draw_canvas() {
 
 function draw_tree_elements(node, plus_x, plus_y) {
     drawn_nodes.push(String(node.id))
-    draw_rect(plus_x, plus_y, rectWidth, rectWidth, line_color, background_color, node.type, 16)
+    existing_cords_map[node.id] = [plus_x, plus_y]
+    draw_rect(plus_x, plus_y, rectWidth, rectWidth, line_color, background_color, node,node.label, "phase: "+node.type ,16)
     node.children.forEach((id, index)=>{
         let child_node = getNodeFromId(id)
         if (!child_node) return;
 
-        if(!drawn_nodes.includes(String(id))){
+        if(!drawn_nodes.includes(String(id)) || id == -1){
             let coords = get_coordinates(child_node, node, plus_x, plus_y, index)
             draw_tree_elements(child_node, coords[0], coords[1])
             child_node = getNodeFromId(id)
             let branchcoords = get_coordinates(child_node, node, plus_x, plus_y, index)
             draw_branch(plus_x+rectHeight/2+25, plus_y+rectHeight+50, branchcoords[0]+rectWidth/2, branchcoords[1])
         }else{
-            
+            let existing_node_coords = existing_cords_map[id]
+            draw_branch(plus_x+rectHeight/2+25, plus_y+rectHeight+50, existing_node_coords[0]+rectWidth/2, existing_node_coords[1])
         }
     })
 }
@@ -312,27 +410,8 @@ function getNodeFromId(id) {
 }
 
 function get_coordinates(node, parent, plus_x, plus_y, current_index, nodes) {
-    const leftNeighbor = current_index > 0 ? getNodeFromId(parent.children[current_index - 1], nodes) : null;
-    const rightNeighbor = current_index < parent.children.length - 1 ? getNodeFromId(parent.children[current_index + 1], nodes) : null;
 
-    const leftChildOffset = leftNeighbor ? getNodeRecursiveWidth(leftNeighbor) : 0;
-    const rightChildOffset = rightNeighbor ? getNodeRecursiveWidth(rightNeighbor) : 0;
-
-    const selfWidthOffset = getNodeRecursiveWidth(node) / 2;
-
-    const optionsLength = parent.children.length;
-    const options_width = parent.children.reduce((acc, childId) => {
-        const childNode = getNodeFromId(childId, nodes);
-        return acc + getNodeRecursiveWidth(childNode) + spacing;
-    }, -spacing); // subtract last spacing
-
-    let accumulatedWidth = 0;
-    for (let i = 0; i < current_index; i++) {
-        const childNode = getNodeFromId(parent.children[i]);
-        accumulatedWidth += getNodeRecursiveWidth(childNode) + spacing;
-    }
-
-    const start_x = plus_x - options_width / 2 + accumulatedWidth + selfWidthOffset - rectWidth / 2;
+    const start_x = plus_x;
     const start_y = plus_y + rectHeight + 100;
 
     return [start_x, start_y];
@@ -368,6 +447,37 @@ function handleMouseDown(event) {
     isDragging = true;
     lastMouseX = event.clientX;
     lastMouseY = event.clientY;
+
+    for(let node_id in clickable_nodes_map){
+        clickableArea = clickable_nodes_map[node_id]
+
+        adj_mousex = lastMouseX - 150;
+        if (adj_mousex >= clickableArea.x && adj_mousex <= clickableArea.x + clickableArea.width){
+            //console.log("in x range")
+            adj_mousey = lastMouseY - 75;
+            if (adj_mousey >= clickableArea.y && adj_mousey <= clickableArea.y + clickableArea.height) {
+                console.log(node_id + "branch")
+            }
+        }
+
+        // Check if the click is within the clickable area
+        
+    }
+
+    for(let branch_id in clickable_branches_map){
+        clickableArea = clickable_branches_map[branch_id]
+
+        adj_mousex = lastMouseX - 150;
+        if (adj_mousex >= clickableArea.x && adj_mousex <= clickableArea.x + clickableArea.width){
+            console.log("in x range")
+            adj_mousey = lastMouseY - 75;
+            if (adj_mousey >= clickableArea.y && adj_mousey <= clickableArea.y + clickableArea.height) {
+                console.log(clickableArea)
+            }
+        }
+    }
+
+    
 }
 
 function handleMouseUp(event) {

@@ -114,7 +114,8 @@
 
     var flow = {{ flow | tojson}}
 
-    var nodes = Object.values(flow.flow)
+    var nodes = []//Object.values(flow.flow)
+    //nodes.push({"id":-1,"type":"AI Response", "children":[], "footer_type":"free_response"})
     var current_demo_index = -1
 
     $(document).ready(function() {
@@ -146,4 +147,5 @@
 </script>
 <script src="/static/js/draw.js"></script>
 <script src="/static/js/demo_editor.js"></script>
+
 {% endblock %}
