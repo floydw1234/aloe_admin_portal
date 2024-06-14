@@ -171,7 +171,7 @@ function draw_filled_node(text, icon){
     
 }
 
-function draw_branch(start_x, start_y, end_x, end_y, color, onClick){
+function draw_branch(start_x, start_y, end_x, end_y, color="black", nodes=[]){
     ctx.beginPath();
     start_x = (start_x + offsetX) * scale;
     start_y = (start_y + offsetY) * scale;
@@ -212,14 +212,20 @@ function draw_branch(start_x, start_y, end_x, end_y, color, onClick){
     ctx.stroke();
 
     // Define the clickable area around the plus sign
-    const clickableArea = {
-        x: mid_x - circleRadius,
-        y: mid_y - circleRadius,
-        width: circleRadius * 2,
-        height: circleRadius * 2
-    };
 
-    clickable_branches_map[Object.entries(clickable_branches_map).length] = clickableArea;
+    if(nodes){
+        const clickableArea = {
+            x: mid_x - circleRadius,
+            y: mid_y - circleRadius,
+            width: circleRadius * 2,
+            height: circleRadius * 2
+        };
+    
+        map_id = nodes[0].id + "_" + nodes[1].id
+    
+        clickable_branches_map[map_id] = clickableArea;
+    }
+    
     
 }
 
@@ -336,7 +342,7 @@ function rectClicked(node){
     console.log(node)
 }
 
-draw();
+draw()
 
 function draw() {
     drawn_nodes = []
@@ -396,10 +402,10 @@ function draw_tree_elements(node, plus_x, plus_y) {
             draw_tree_elements(child_node, coords[0], coords[1])
             child_node = getNodeFromId(id)
             let branchcoords = get_coordinates(child_node, node, plus_x, plus_y, index)
-            draw_branch(plus_x+rectHeight/2+25, plus_y+rectHeight+50, branchcoords[0]+rectWidth/2, branchcoords[1])
+            draw_branch(plus_x+rectHeight/2+25, plus_y+rectHeight+50, branchcoords[0]+rectWidth/2, branchcoords[1],color="black",nodes=[node,child_node])
         }else{
             let existing_node_coords = existing_cords_map[id]
-            draw_branch(plus_x+rectHeight/2+25, plus_y+rectHeight+50, existing_node_coords[0]+rectWidth/2, existing_node_coords[1])
+            draw_branch(plus_x+rectHeight/2+25, plus_y+rectHeight+50, existing_node_coords[0]+rectWidth/2, existing_node_coords[1],color="black", nodes=[node,child_node])
         }
     })
 }
@@ -451,12 +457,12 @@ function handleMouseDown(event) {
     for(let node_id in clickable_nodes_map){
         clickableArea = clickable_nodes_map[node_id]
 
-        adj_mousex = lastMouseX - 150;
+        adj_mousex = lastMouseX - 325;
         if (adj_mousex >= clickableArea.x && adj_mousex <= clickableArea.x + clickableArea.width){
             //console.log("in x range")
             adj_mousey = lastMouseY - 75;
             if (adj_mousey >= clickableArea.y && adj_mousey <= clickableArea.y + clickableArea.height) {
-                console.log(node_id + "branch")
+                edit_node(node_id)
             }
         }
 
@@ -467,18 +473,30 @@ function handleMouseDown(event) {
     for(let branch_id in clickable_branches_map){
         clickableArea = clickable_branches_map[branch_id]
 
-        adj_mousex = lastMouseX - 150;
+        adj_mousex = lastMouseX - 325;
         if (adj_mousex >= clickableArea.x && adj_mousex <= clickableArea.x + clickableArea.width){
-            console.log("in x range")
             adj_mousey = lastMouseY - 75;
             if (adj_mousey >= clickableArea.y && adj_mousey <= clickableArea.y + clickableArea.height) {
-                console.log(clickableArea)
+                edit_branch(branch_id)
             }
         }
     }
-
-    
 }
+
+
+function edit_node(node_id){
+    $("#exampleModalLabel").html("Edit Node")
+    $(".modal-body").html(`Edit node ${node_id} here...`)
+
+    $("#exampleModal").modal("show");
+}
+
+function edit_branch(branch_id){
+    $("#exampleModalLabel").html("Edit Branch")
+    $(".modal-body").html(`Edit branch ${branch_id}  here...`)
+    $("#exampleModal").modal("show");
+}
+
 
 function handleMouseUp(event) {
     isDragging = false;
