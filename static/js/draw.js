@@ -118,6 +118,28 @@ function draw_initial_ui(){
 
 }
 
+function insert_node(parent_id, children){
+    let currNode = {
+        "id":3,
+        "type":"Middle",
+        "label":"placeHolder mid",
+        "script":[],
+        "options":[],
+        "children":[2],
+    }
+    nodes.push(currNode)
+
+    let parent = getNodeFromId(parent_id)
+
+    children.forEach((child_id)=>{
+        parent.children = parent.children.toSpliced(parent.children.indexOf(child_id),1)
+    })
+    parent.children.push(currNode.id)
+    
+    draw();
+
+}
+
 
 
 function draw_plus(x,y, plus_size){
@@ -171,7 +193,7 @@ function draw_filled_node(text, icon){
     
 }
 
-function draw_branch(start_x, start_y, end_x, end_y, color="black", nodes=[]){
+function draw_branch(start_x, start_y, end_x, end_y, color="black", branchNodes=[]){
     ctx.beginPath();
     start_x = (start_x + offsetX) * scale;
     start_y = (start_y + offsetY) * scale;
@@ -213,7 +235,7 @@ function draw_branch(start_x, start_y, end_x, end_y, color="black", nodes=[]){
 
     // Define the clickable area around the plus sign
 
-    if(nodes){
+    if(branchNodes){
         const clickableArea = {
             x: mid_x - circleRadius,
             y: mid_y - circleRadius,
@@ -221,7 +243,7 @@ function draw_branch(start_x, start_y, end_x, end_y, color="black", nodes=[]){
             height: circleRadius * 2
         };
     
-        map_id = nodes[0].id + "_" + nodes[1].id
+        map_id = branchNodes[0].id + "_" + branchNodes[1].id
     
         clickable_branches_map[map_id] = clickableArea;
     }
@@ -230,8 +252,8 @@ function draw_branch(start_x, start_y, end_x, end_y, color="black", nodes=[]){
 }
 
 // Example usage
-function handlePlusClick(nodes) {
-    console.log(nodes)
+function handlePlusClick(branchNodes) {
+    console.log(branchNodes)
 }
 
 
@@ -402,10 +424,10 @@ function draw_tree_elements(node, plus_x, plus_y) {
             draw_tree_elements(child_node, coords[0], coords[1])
             child_node = getNodeFromId(id)
             let branchcoords = get_coordinates(child_node, node, plus_x, plus_y, index)
-            draw_branch(plus_x+rectHeight/2+25, plus_y+rectHeight+50, branchcoords[0]+rectWidth/2, branchcoords[1],color="black",nodes=[node,child_node])
+            draw_branch(plus_x+rectHeight/2+25, plus_y+rectHeight+50, branchcoords[0]+rectWidth/2, branchcoords[1],color="black",branchNodes=[node,child_node])
         }else{
             let existing_node_coords = existing_cords_map[id]
-            draw_branch(plus_x+rectHeight/2+25, plus_y+rectHeight+50, existing_node_coords[0]+rectWidth/2, existing_node_coords[1],color="black", nodes=[node,child_node])
+            draw_branch(plus_x+rectHeight/2+25, plus_y+rectHeight+50, existing_node_coords[0]+rectWidth/2, existing_node_coords[1],color="black", branchNodes=[node,child_node])
         }
     })
 }
@@ -430,7 +452,7 @@ function getNodeRecursiveWidth(node) {
 
     let totalChildrenWidth = 0;
     node.children.forEach((childId, index) => {
-        const childNode = nodes.find(n => n.id === childId);
+        const childNode = getNodeFromId(childId);
         if (childNode) {
             const childWidth = getNodeRecursiveWidth(childNode);
             totalChildrenWidth += childWidth;
@@ -465,8 +487,6 @@ function handleMouseDown(event) {
                 edit_node(node_id)
             }
         }
-
-        // Check if the click is within the clickable area
         
     }
 
@@ -489,6 +509,7 @@ function edit_node(node_id){
     $(".modal-body").html(`Edit node ${node_id} here...`)
 
     $("#exampleModal").modal("show");
+    insert_node(1,[2])
 }
 
 function edit_branch(branch_id){
