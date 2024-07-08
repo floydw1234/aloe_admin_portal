@@ -320,7 +320,6 @@ function get_coordinates(node, parent, plus_x, plus_y, current_index, nodes) {
 
     const selfWidthOffset = getNodeRecursiveWidth(node) / 2;
 
-    const optionsLength = parent.children.length;
     const options_width = parent.children.reduce((acc, childId) => {
         const childNode = getNodeFromId(childId, nodes);
         return acc + getNodeRecursiveWidth(childNode) + spacing;
@@ -332,8 +331,12 @@ function get_coordinates(node, parent, plus_x, plus_y, current_index, nodes) {
         accumulatedWidth += getNodeRecursiveWidth(childNode) + spacing;
     }
 
-    const start_x = plus_x - options_width / 2 + accumulatedWidth + selfWidthOffset - rectWidth / 2;
+    let start_x = plus_x - options_width / 2 + accumulatedWidth + selfWidthOffset - rectWidth / 2;
     const start_y = plus_y + rectHeight + 100;
+
+    if(parent.children.length == 1){
+        start_x = plus_x
+    }
 
     return [start_x, start_y];
 }
